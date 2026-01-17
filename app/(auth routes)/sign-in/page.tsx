@@ -1,11 +1,11 @@
 "use client";
 
-import css from "./SignUpPage.module.css";
+import css from "./SignInPage.module.css";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
-import { register } from "@/lib/api/clientApi";
+import { login } from "@/lib/api/clientApi";
 
-export default function SignUpPage() {
+export default function SignInPage() {
   const router = useRouter();
   const setUser = useAuthStore((s) => s.setUser);
 
@@ -15,23 +15,25 @@ export default function SignUpPage() {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    const email = String(formData.get("email") || "");
-    const password = String(formData.get("password") || "");
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "").trim();
 
     try {
-      const user = await register({ email, password });
+      const user = await login({ email, password });
+
       setUser(user);
+
       router.replace("/profile");
       form.reset();
-    } catch (err) {
-      console.error("Register failed", err);
-      alert("Registration failed");
+    } catch {
+      alert("Login failed");
     }
   };
   return (
     <main className={css.mainContent}>
-      <h1 className={css.formTitle}>Sign up</h1>
       <form className={css.form} onSubmit={handleSubmit}>
+        <h1 className={css.formTitle}>Sign in</h1>
+
         <div className={css.formGroup}>
           <label htmlFor="email">Email</label>
           <input
@@ -56,11 +58,11 @@ export default function SignUpPage() {
 
         <div className={css.actions}>
           <button type="submit" className={css.submitButton}>
-            Register
+            Log in
           </button>
         </div>
 
-        <p className={css.error}>Error</p>
+        <p className={css.error}></p>
       </form>
     </main>
   );
