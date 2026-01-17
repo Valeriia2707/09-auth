@@ -1,7 +1,7 @@
 "use client";
 import css from "./NoteForm.module.css";
 import { useMutation } from "@tanstack/react-query";
-import { createNote } from "@/lib/api/api";
+import { createNote } from "@/lib/api/clientApi";
 import { useNoteDraftStore } from "@/lib/store/noteStore";
 import { useRouter } from "next/navigation";
 import { NoteFormValues } from "@/types/note";
@@ -19,7 +19,7 @@ export default function NoteForm() {
   const handleChange = (
     event: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     setDraft({
       ...draft,
@@ -70,7 +70,8 @@ export default function NoteForm() {
           name="tag"
           className={css.select}
           defaultValue={draft?.tag}
-          onChange={handleChange}>
+          onChange={handleChange}
+        >
           <option value="Todo">Todo</option>
           <option value="Work">Work</option>
           <option value="Personal">Personal</option>
@@ -94,4 +95,3 @@ export default function NoteForm() {
     </form>
   );
 }
-
