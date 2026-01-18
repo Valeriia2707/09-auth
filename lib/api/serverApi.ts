@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { api } from "./api";
 import { Note } from "@/types/note";
 import { User } from "@/types/user";
+import { SessionRequest } from "./clientApi";
 
 
 export interface NoteRes {
@@ -45,6 +46,6 @@ export const getMe = async () => {
 
 export const checkSession = async () => {
   const authHeaders = await getAuthHeaders();
-  const res = await api.get<string>("/auth/session", authHeaders);
-  return res.data;
+  const res = await api.get<SessionRequest>("/auth/session", authHeaders);
+  return res;
 };

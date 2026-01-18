@@ -42,7 +42,7 @@ export default function NotesClient({ activeTag }: { activeTag?: string }) {
         </Link>
       </header>
 
-      <NoteList notes={data?.notes} />
+      {data?.notes && data.notes.length > 0 && <NoteList notes={data.notes} />}
     </div>
   );
 }

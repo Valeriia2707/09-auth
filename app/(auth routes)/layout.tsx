@@ -9,6 +9,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
+    router.refresh();
     if (isAuthenticated) {
       router.replace("/profile");
     }
