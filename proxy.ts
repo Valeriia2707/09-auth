@@ -7,7 +7,7 @@ const PRIVATE_PREFIXES = ["/profile", "/notes"];
 const ACCESS_TOKEN = "accessToken";
 const REFRESH_TOKEN = "refreshToken";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
  
@@ -50,7 +50,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const isPublic = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
-  const isPrivate = PRIVATE_PREFIXES.some((p) => pathname.startsWith(p)) || pathname === "/";
+  const isPrivate = PRIVATE_PREFIXES.some((p) => pathname.startsWith(p));
 
 
   if (!isAuthenticated && isPrivate) {

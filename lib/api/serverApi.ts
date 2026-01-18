@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 import { api } from "./api";
 import { Note } from "@/types/note";
 import { User } from "@/types/user";
@@ -11,10 +11,11 @@ export interface NoteRes {
 }
 
 const getAuthHeaders = async () => {
-  const headersList = await headers();
+  const cookieStore = await cookies();
+  const cookieString = cookieStore.toString();
   return {
     headers: {
-      cookie: headersList.get("cookie") || "",
+      cookie: cookieString,
     },
   };
 };

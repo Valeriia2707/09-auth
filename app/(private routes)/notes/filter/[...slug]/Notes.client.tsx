@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fetchNotes } from "@/lib/api/clientApi";
 import css from "./NotesPage.module.css";
 import SearchBox from "@/components/SearchBox/SearchBox";
@@ -12,10 +12,19 @@ import Link from "next/link";
 export default function NotesClient({ activeTag }: { activeTag?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [query]);
 
   const { data } = useQuery({
-    queryKey: ["notes", currentPage, query, activeTag],
-    queryFn: () => fetchNotes(currentPage, query, activeTag),
+    queryKey: ["notes", currentPage, debouncedQuery, activeTag],
+    queryFn: () => fetchNotes(currentPage, debouncedQuery, activeTag),
     placeholderData: keepPreviousData,
   });
 
@@ -24,10 +33,7 @@ export default function NotesClient({ activeTag }: { activeTag?: string }) {
       <header className={css.toolbar}>
         <SearchBox
           query={query}
-          setState={(newQuery: string, page: number) => {
-            setQuery(newQuery);
-            setCurrentPage(page);
-          }}
+          setState={(newQuery: string) => setQuery(newQuery)}
         />
 
         {data && data.totalPages > 1 && (
