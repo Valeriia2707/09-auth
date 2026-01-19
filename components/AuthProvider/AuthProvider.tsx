@@ -15,7 +15,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    console.log("isAuthenticated", isAuthenticated);
     const isPrivateRoute =
       pathname.startsWith("/profile") || pathname.startsWith("/notes");
 
@@ -26,11 +25,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        console.log("Refresh session");
         const session = await checkSession();
         const user = await getMe();
-        console.log("Session", session);
-        console.log("User", user);
         if (session && user) {
           setUser(user);
         } else {
