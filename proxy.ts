@@ -1,78 +1,69 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { checkSession } from "./lib/api/serverApi";
 
-const PUBLIC_ROUTES = ["/sign-in", "/sign-up"];
-const PRIVATE_PREFIXES = ["/profile", "/notes"];
+const PRIVATE_ROUTES = ["/profile", "/notes"];
+const AUTH_ROUTES = ["/sign-in", "/sign-up"];
 
-const ACCESS_TOKEN = "accessToken";
-const REFRESH_TOKEN = "refreshToken";
+export async function proxy(request: NextRequest) {
+  const { nextUrl } = request;
 
-export async function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
- 
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.includes(".")
-  ) {
-    return NextResponse.next();
-  }
-
-  const accessToken = req.cookies.get(ACCESS_TOKEN)?.value;
-  const refreshToken = req.cookies.get(REFRESH_TOKEN)?.value;
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const refreshToken = cookieStore.get("refreshToken")?.value;
 
   let isAuthenticated = !!accessToken;
-  const response = NextResponse.next();
+  let justRefreshed = false;
+  let newCookies: string[] = [];
 
-
-  if (!accessToken && refreshToken) {
+  if (!isAuthenticated && refreshToken) {
     try {
+      const response = await checkSession(`refreshToken=${refreshToken}`);
 
-      const sessionRes = await checkSession();
-
-      if (sessionRes.status === 200 && sessionRes.data.isSuccess) {
+      if (response.status === 200) {
         isAuthenticated = true;
-
-        const setCookieHeaders = sessionRes.headers["set-cookie"];
-        
-        if (setCookieHeaders) {
-
-          setCookieHeaders.forEach((cookie) => {
-            response.headers.append("set-cookie", cookie);
-          });
+        justRefreshed = true;
+        const setCookieHeader = response.headers["set-cookie"];
+        if (setCookieHeader) {
+          newCookies = Array.isArray(setCookieHeader)
+            ? setCookieHeader
+            : [setCookieHeader];
         }
       }
     } catch (error) {
-      console.error("Middleware session check failed:", error);
-      isAuthenticated = false;
+      console.error("Session refresh failed in proxy:", error);
     }
   }
 
-  const isPublic = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
-  const isPrivate = PRIVATE_PREFIXES.some((p) => pathname.startsWith(p));
+  const isPrivateRoute = PRIVATE_ROUTES.some((r) =>
+    nextUrl.pathname.startsWith(r),
+  );
+  const isAuthRoute = AUTH_ROUTES.some((a) =>
+    nextUrl.pathname.startsWith(a),
+  );
 
+  if (justRefreshed) {
+    const targetUrl = isAuthRoute ? new URL("/", request.url) : request.url;
+    const redirectResponse = NextResponse.redirect(targetUrl);
 
-  if (!isAuthenticated && isPrivate) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/sign-in";
-    return NextResponse.redirect(url);
-  }
-
-  
-  if (isAuthenticated && isPublic) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/"; 
-    
-
-    const redirectResponse = NextResponse.redirect(url);
-    response.headers.forEach((value, key) => {
-      if (key.toLowerCase() === "set-cookie") {
-        redirectResponse.headers.append(key, value);
-      }
+    newCookies.forEach((cookie) => {
+      redirectResponse.headers.append("set-cookie", cookie);
     });
+
     return redirectResponse;
   }
 
-  return response;
+  if (isPrivateRoute && !isAuthenticated) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  if (isAuthRoute && isAuthenticated) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
+};

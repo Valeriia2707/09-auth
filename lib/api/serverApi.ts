@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { api } from "./api";
 import { Note } from "@/types/note";
 import { User } from "@/types/user";
-import { SessionRequest } from "./clientApi";
 
 
 export interface NoteRes {
@@ -45,8 +44,11 @@ export const getMe = async () => {
   return res.data;
 };
 
-export const checkSession = async () => {
-  const authHeaders = await getAuthHeaders();
-  const res = await api.get<SessionRequest>("/auth/session", authHeaders);
+export const checkSession = async (externalCookie?: string) => {
+  const cookieString = externalCookie || (await cookies()).toString();
+
+  const res = await api.get<string>("/auth/session", {
+    headers: { Cookie: cookieString },
+  });
   return res;
 };
