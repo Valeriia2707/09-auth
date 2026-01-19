@@ -18,7 +18,7 @@ export type LoginRequest = {
 };
 
 export type SessionRequest = {
-  isSuccess: boolean;
+  success: boolean;
 };
 
 export type UpdateMeRequest = {
@@ -70,7 +70,7 @@ export async function logout(): Promise<void> {
 
 export async function checkSession(): Promise<boolean> {
   const res = await api.get<SessionRequest>("/auth/session");
-  return res.data.isSuccess;
+  return res.data.success;
 }
 
 export async function getMe(): Promise<User> {

@@ -1,37 +1,44 @@
 "use client";
 
-import css from "./SignInPage.module.css";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/store/authStore";
 import { login } from "@/lib/api/clientApi";
+import { useAuthStore } from "@/lib/store/authStore";
+import css from "./SignInPage.module.css";
+import axios from "axios";
+
+interface ApiErrorResponse {
+  message: string;
+}
 
 export default function SignInPage() {
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const setUser = useAuthStore((s) => s.setUser);
+  const setUser = useAuthStore((state) => state.setUser);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-
-    const email = String(formData.get("email") || "").trim();
-    const password = String(formData.get("password") || "").trim();
+  const handleAction = async (formData: FormData) => {
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
     try {
+      setError(null);
       const user = await login({ email, password });
-
       setUser(user);
-
-      router.replace("/profile");
-      form.reset();
-    } catch {
-      alert("Login failed");
+      router.push("/profile");
+    } catch (err: unknown) {
+      if (axios.isAxiosError<ApiErrorResponse>(err)) {
+        const errorMessage =
+          err.response?.data?.message || "Something went wrong";
+        setError(errorMessage);
+      } else {
+        setError("An unexpected error occurred");
+      }
     }
   };
+
   return (
     <main className={css.mainContent}>
-      <form className={css.form} onSubmit={handleSubmit}>
+      <form action={handleAction} className={css.form}>
         <h1 className={css.formTitle}>Sign in</h1>
 
         <div className={css.formGroup}>
@@ -62,7 +69,7 @@ export default function SignInPage() {
           </button>
         </div>
 
-        <p className={css.error}></p>
+        {error && <p className={css.error}>{error}</p>}
       </form>
     </main>
   );
