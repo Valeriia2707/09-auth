@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+NoteHub 📝
+NoteHub is a full-stack web application designed for managing personal notes. It features a robust user authentication system, allowing users to securely register, log in, and manage their private collection of notes.
 
-## Getting Started
+🚀 Features
+User Authentication: Secure Registration, Login, and Logout functionality.
 
-First, run the development server:
+Private Routes: User notes are protected and accessible only after successful authentication.
 
-```bash
+CRUD Operations: Create, Read, and Delete notes in real-time.
+
+State Persistence: User session is maintained across page refreshes.
+
+Responsive Design: A clean and intuitive interface that works across all devices.
+
+Loading States: Integrated loaders for a smooth user experience during API calls.
+
+🛠 Tech Stack
+React: For building the component-based user interface.
+
+Redux Toolkit: For centralized state management (auth, notes, and loading states).
+
+React Router: For navigation and implementing protected/public routes.
+
+Axios: For handling asynchronous HTTP requests to the backend API.
+
+CSS Modules / Styled Components: For modular and maintainable styling.
+
+Vercel: For automated deployment and hosting.
+
+📦 Installation & Setup
+Clone the repository:
+
+Bash
+git clone https://github.com/valeriia2707/ваш-репозиторій.git
+Install dependencies:
+
+Bash
+npm install
+Create a .env file (if applicable) and add your API base URL:
+
+Фрагмент коду
+REACT_APP_API_URL=https://connections-api.herokuapp.com
+Start the development server:
+
+Bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+🔐 Key Concepts Demonstrated
+Handling JWT Tokens for persistent authentication.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Implementing Async Thunks in Redux for side effects.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Conditional rendering based on authentication status.
